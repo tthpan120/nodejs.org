@@ -4,7 +4,8 @@
 
 // BUILD.JS: This file is responsible for building static HTML pages
 
-const fs = require('fs')
+const realFs = require('fs')
+const gracefulFs = require('graceful-fs')
 const path = require('path')
 const Metalsmith = require('metalsmith')
 const collections = require('metalsmith-collections')
@@ -30,6 +31,8 @@ const navigation = require('./scripts/plugins/navigation')
 const anchorMarkdownHeadings = require('./scripts/plugins/anchor-markdown-headings')
 const loadVersions = require('./scripts/load-versions')
 const latestVersion = require('./scripts/helpers/latestversion')
+
+gracefulFs.gracefulify(realFs)
 
 // Set the default language, also functions as a fallback for properties which
 // are not defined in the given language.
@@ -231,7 +234,7 @@ function buildCSS () {
     precision: 6
   }
 
-  fs.mkdir(path.join(__dirname, 'build/static/css'), { recursive: true }, (err) => {
+  realFs.mkdir(path.join(__dirname, 'build/static/css'), { recursive: true }, (err) => {
     if (err) {
       throw err
     }
@@ -246,7 +249,7 @@ function buildCSS () {
           console.warn(warn.toString())
         })
 
-        fs.writeFile(dest, res.css, (err) => {
+        realFs.writeFile(dest, res.css, (err) => {
           if (err) {
             throw err
           }
@@ -264,7 +267,7 @@ function copyStatic () {
   console.log('[ncp] build/static started')
   const labelForBuild = '[ncp] build/static finished'
   console.time(labelForBuild)
-  fs.mkdir(path.join(__dirname, 'build/static'), { recursive: true }, (err) => {
+  realFs.mkdir(path.join(__dirname, 'build/static'), { recursive: true }, (err) => {
     if (err) {
       throw err
     }
@@ -312,7 +315,7 @@ function fullBuild (opts) {
     if (err) { throw err }
 
     // Executes the build cycle for every locale.
-    fs.readdir(path.join(__dirname, 'locale'), (e, locales) => {
+    realFs.readdir(path.join(__dirname, 'locale'), (e, locales) => {
       if (e) {
         throw e
       }
